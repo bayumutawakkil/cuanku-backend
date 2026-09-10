@@ -10,5 +10,6 @@ router.get('/', transaksicontroller.ambilSemuaTransaksi);
 
 // URL untuk mengambil daftar stok produk
 router.get('/stok', transaksicontroller.ambilStokBarang);
+router.post('/stok', transaksicontroller.tambahProduk);
 
 module.exports = router;

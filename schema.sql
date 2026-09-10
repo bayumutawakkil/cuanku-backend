@@ -12,8 +12,19 @@ CREATE TABLE IF NOT EXISTS users (
     nama_UMKM    VARCHAR(100) NOT NULL,
     email        VARCHAR(100) NOT NULL UNIQUE,
     password     VARCHAR(255) NOT NULL,
+    nama_lengkap VARCHAR(100),
+    username     VARCHAR(100),
+    nomor_telepon VARCHAR(30),
+    kategori_usaha VARCHAR(100),
+    alamat       VARCHAR(255),
     dibuat_pada  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nama_lengkap VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nomor_telepon VARCHAR(30);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS kategori_usaha VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS alamat VARCHAR(255);
 
 CREATE TABLE IF NOT EXISTS produk (
     id_produk    SERIAL PRIMARY KEY,

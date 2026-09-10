@@ -79,8 +79,29 @@ const ambilStokBarang = async (req, res) => {
     } 
 };
 
+const tambahProduk = async (req, res) => {
+    const { nama_produk, sisa_stok, harga_beli, harga_jual } = req.body;
+
+    if (!nama_produk || sisa_stok === undefined || !harga_beli || !harga_jual) {
+        return res.status(400).json({ error: "Nama, stok, harga beli, dan harga jual wajib diisi" });
+    }
+
+    try {
+        const result = await db.query(
+            `INSERT INTO produk (nama_produk, sisa_stok, harga_beli, harga_jual)
+             VALUES ($1, $2, $3, $4) RETURNING *`,
+            [nama_produk, sisa_stok, harga_beli, harga_jual]
+        );
+        return res.status(201).json({ pesan: "Produk berhasil ditambahkan", data: result.rows[0] });
+    } catch (error) {
+        console.error("Error database produk:", error.message);
+        return res.status(500).json({ error: "Gagal menyimpan produk ke database" });
+    }
+};
+
 module.exports = {
     catatTransaksi,
     ambilSemuaTransaksi,
-    ambilStokBarang
+    ambilStokBarang,
+    tambahProduk
 };

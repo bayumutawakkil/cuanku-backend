@@ -1,10 +1,10 @@
 -- seed.sql
 --
--- Data contoh buat testing lewat Postman, biar tabel enggak kosong.
--- Cara pakai: mysql -u root -p db_cuanku < seed.sql
+-- Data awal untuk pengujian aplikasi.
+-- Jalankan sekali di Supabase SQL Editor setelah schema.sql.
 
-INSERT INTO users (nama_UMKM, email, password) VALUES
-('Kedai Kopi Melati', 'test@cuanku.com', 'password123');
+INSERT INTO users (nama_UMKM, nama_lengkap, username, email, password, kategori_usaha, alamat) VALUES
+('Kedai Kopi Melati', 'Pemilik Kedai', 'pemilik_kedai', 'test@cuanku.com', 'password123', 'Kuliner', 'Alamat belum diatur');
 
 INSERT INTO produk (nama_produk, sisa_stok, harga_beli, harga_jual) VALUES
 ('Kopi Susu', 40, 6000, 12000),
