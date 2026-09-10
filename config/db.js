@@ -6,7 +6,7 @@ const pool = new Pool({
     ssl: {
         rejectUnauthorized: false // wajib untuk koneksi ke Supabase
     },
-    max: 10,          // mirip connectionLimit
+    max: Number(process.env.DB_POOL_MAX || 1),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
 });

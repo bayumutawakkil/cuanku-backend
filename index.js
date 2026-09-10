@@ -9,7 +9,8 @@ const transaksiRoutes = require('./routes/transaksiRoutes');
 
 const app = express();
 
-app.use(cors());
+const allowedOrigin = process.env.FRONTEND_URL;
+app.use(cors(allowedOrigin ? { origin: allowedOrigin } : undefined));
 app.use(express.json());
 
 // mendaftarkan semua jalur api untuk frontend
@@ -17,7 +18,11 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/transaksi', transaksiRoutes);
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server jalan di http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server jalan di http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;

@@ -8,7 +8,7 @@ const daftar = async (req, res) => {
     }
 
     try {
-        const query = 'INSERT INTO users (nama_UMKM, email, password) VALUES (?, ?, ?)';
+        const query = 'INSERT INTO users (nama_UMKM, email, password) VALUES ($1, $2, $3) RETURNING *';
         await db.query(query, [nama_UMKM, email, password]);
         
         return res.status(201).json({
@@ -30,8 +30,9 @@ const masuk = async (req, res) => {
     }
 
     try {
-        const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
-        const [rows] = await db.query(query, [email, password]);
+        const query = 'SELECT * FROM users WHERE email = $1 AND password = $2';
+        const result = await db.query(query, [email, password]);
+        const rows = result.rows;
 
         if (rows.length === 0) {
             return res.status(401).json({ error: "Email atau password salah!"});

@@ -14,15 +14,15 @@ const catatTransaksi = async(req, res) => {
 
         const queryInput = `
             INSERT INTO transaksi (jenis_transaksi, kategori, jumlah, keterangan, tanggal)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES ($1, $2, $3, $4, $5) RETURNING id_transaksi
             `;
 
-        const [hasil] = await db.query(queryInput, [jenis_transaksi, kategori, jumlah, keterangan, tanggalHariIni]);
+        const result = await db.query(queryInput, [jenis_transaksi, kategori, jumlah, keterangan, tanggalHariIni]);
         
         return res.status(201).json({
             pesan: "Transaksi berhasil dicatat",
             data: {
-                id_transaksi: hasil.insertId,
+                id_transaksi: result.rows[0].id_transaksi,
                 jenis_transaksi,
                 kategori,
                 jumlah,
@@ -39,7 +39,8 @@ const catatTransaksi = async(req, res) => {
 //fungsi mengambil data historis dari database asli
 const ambilSemuaTransaksi = async (req, res) => {
     try {
-        const [daftartransaksi] = await db.query("SELECT * FROM transaksi ORDER BY tanggal DESC");
+        const result = await db.query("SELECT * FROM transaksi ORDER BY tanggal DESC");
+        const daftartransaksi = result.rows;
 
         return res.json({
             pesan: "Berhasil mengambil riwayat transaksi dari database",
@@ -55,7 +56,7 @@ const ambilSemuaTransaksi = async (req, res) => {
 // halaman stok barang
 const ambilStokBarang = async (req, res) => {
     try {
-        const [daftarProduk] = await db.query(`
+        const result = await db.query(`
             SELECT
                 id_produk,
                 nama_produk,
@@ -65,6 +66,7 @@ const ambilStokBarang = async (req, res) => {
                 ROUND(((harga_jual - harga_beli) / harga_beli) * 100) AS margin_persen 
             FROM produk
         `);
+        const daftarProduk = result.rows;
 
         return res.json({
             pesan: "Berhasil mengambil daftar stok produk dari database",
