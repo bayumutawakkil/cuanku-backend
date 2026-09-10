@@ -13,6 +13,15 @@ const allowedOrigin = process.env.FRONTEND_URL;
 app.use(cors(allowedOrigin ? { origin: allowedOrigin } : undefined));
 app.use(express.json());
 
+if (process.env.VERCEL) {
+    app.use((req, res, next) => {
+        if (!req.url.startsWith('/api')) {
+            req.url = `/api${req.url}`;
+        }
+        next();
+    });
+}
+
 // mendaftarkan semua jalur api untuk frontend
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/auth', authRoutes);

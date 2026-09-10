@@ -9,7 +9,7 @@
 
 ## Deploy backend ke Vercel
 
-Jadikan folder `Web_Cuanku` sebagai root project Vercel, lalu tambahkan:
+Jadikan folder `cuanku-backend` sebagai **Root Directory** project Vercel, lalu tambahkan:
 
 - `DATABASE_URL`: connection string Supabase Session pooler.
 - `FRONTEND_URL`: URL deployment frontend, misalnya `https://cuanku.vercel.app`.
@@ -24,5 +24,7 @@ Jadikan folder `cuanku-frontend` sebagai root project Vercel dan tambahkan:
 - `NEXT_PUBLIC_API_URL`: URL backend Vercel dengan suffix `/api`, misalnya `https://cuanku-api.vercel.app/api`.
 
 Setelah environment variable ditambahkan, lakukan redeploy agar nilainya masuk ke build production.
+
+Preset Vercel dapat memakai **Other**. Biarkan Build Command dan Output Directory kosong; Vercel akan mendeteksi `api/index.js` sebagai serverless function. Pastikan **Install Command** menggunakan `npm install` dan jangan mengaktifkan `npm run build` karena backend ini tidak memiliki tahap build.
 
 Untuk pengembangan lokal, salin `.env.example` menjadi `.env` dan isi nilai yang sesuai.
