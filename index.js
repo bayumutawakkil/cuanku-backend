@@ -9,8 +9,19 @@ const transaksiRoutes = require('./routes/transaksiRoutes');
 
 const app = express();
 
-const allowedOrigin = process.env.FRONTEND_URL;
-app.use(cors(allowedOrigin ? { origin: allowedOrigin } : undefined));
+const allowedOrigins = (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+app.use(cors(allowedOrigins.length ? {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Origin tidak diizinkan oleh CORS.'));
+    }
+} : undefined));
 app.use(express.json());
 
 if (process.env.VERCEL) {
