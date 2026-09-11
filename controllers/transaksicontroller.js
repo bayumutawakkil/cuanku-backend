@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 // untuk mencatat transaksi baru (pemasukan/pengeluaran) ke database asli
 const catatTransaksi = async(req, res) => {
-    const { jenis_transaksi, kategori, jumlah, keterangan } = req.body;
+    const { jenis_transaksi, kategori, jumlah, keterangan, tanggal } = req.body;
 
     //validasi input
     if (!jenis_transaksi || !kategori || !jumlah) {
@@ -10,14 +10,14 @@ const catatTransaksi = async(req, res) => {
     }
 
     try {
-        const tanggalHariIni = new Date().toISOString().split('T')[0];
+        const tanggalTransaksi = tanggal || new Date().toISOString().split('T')[0];
 
         const queryInput = `
             INSERT INTO transaksi (jenis_transaksi, kategori, jumlah, keterangan, tanggal)
             VALUES ($1, $2, $3, $4, $5) RETURNING id_transaksi
             `;
 
-        const result = await db.query(queryInput, [jenis_transaksi, kategori, jumlah, keterangan, tanggalHariIni]);
+        const result = await db.query(queryInput, [jenis_transaksi, kategori, jumlah, keterangan, tanggalTransaksi]);
         
         return res.status(201).json({
             pesan: "Transaksi berhasil dicatat",
@@ -27,7 +27,7 @@ const catatTransaksi = async(req, res) => {
                 kategori,
                 jumlah,
                 keterangan,
-                tanggal: tanggalHariIni
+                tanggal: tanggalTransaksi
         }
     });
     } catch (error) {
