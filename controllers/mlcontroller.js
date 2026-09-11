@@ -22,7 +22,7 @@ const getPredictionTrend = async (req, res) => {
         if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
             return res.status(503).json({
                 status: 'error',
-                message: 'ML Service sedang tidak aktif. Pastikan server FastAPI sudah dinyalakan di port 8001.'
+                message: 'ML Service sedang tidak aktif. Periksa URL dan status deployment ML service.'
             });
         }
 
