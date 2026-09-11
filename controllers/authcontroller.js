@@ -44,15 +44,17 @@ const daftar = async (req, res) => {
 
 
 const masuk = async (req, res) => {
-    const { email, password } = req.body;
+    const { email: identifier, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ error: "Email dan password wajib diisi!"});
+    if (!identifier || !password) {
+        return res.status(400).json({ error: "Username/email dan password wajib diisi!"});
     }
 
     try {
-        const query = 'SELECT * FROM users WHERE email = $1';
-        const result = await db.query(query, [email.trim().toLowerCase()]);
+        const query = `SELECT * FROM users
+            WHERE LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1)
+            LIMIT 1`;
+        const result = await db.query(query, [identifier.trim()]);
         const rows = result.rows;
 
         if (rows.length === 0 || !(await bcrypt.compare(password, rows[0].password))) {
