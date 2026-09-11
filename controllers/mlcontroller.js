@@ -17,7 +17,7 @@ const getPredictionTrend = async (req, res) => {
         const response = await axios.post(
             `${ML_SERVICE_URL}/api/ml/predict-trend`,
             { n_hari: days },
-            { timeout: 5000 }
+            { timeout: 15000 }
         );
 
         return res.status(200).json({
