@@ -14,7 +14,8 @@ Jadikan folder `cuanku-backend` sebagai **Root Directory** project Vercel, lalu 
 - `DATABASE_URL`: connection string Supabase Session pooler.
 - `FRONTEND_URL`: URL deployment frontend, misalnya `https://cuanku.vercel.app`.
 - `DB_POOL_MAX`: `1`.
-- `ML_SERVICE_URL`: URL publik service FastAPI dari project `cuanku-ml`.
+- `ML_SERVICE_URL`: URL publik service FastAPI dari project `cuanku-ml`. Untuk lokal, gunakan `http://127.0.0.1:8001`.
+- `JWT_SECRET`: secret panjang dan acak untuk menandatangani token login.
 
 Vercel akan memakai `api/index.js` sebagai serverless function. Endpoint tetap menggunakan prefix `/api`, misalnya `/api/auth/masuk`.
 

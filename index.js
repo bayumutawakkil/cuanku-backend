@@ -6,6 +6,7 @@ require('dotenv').config();
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const authRoutes = require('./routes/authRoutes');
 const transaksiRoutes = require('./routes/transaksiRoutes');
+const { requireAuth } = require('./middleware/auth');
 
 const app = express();
 
@@ -34,9 +35,9 @@ if (process.env.VERCEL) {
 }
 
 // mendaftarkan semua jalur api untuk frontend
-app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/dashboard', requireAuth, dashboardRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/transaksi', transaksiRoutes);
+app.use('/api/transaksi', requireAuth, transaksiRoutes);
 
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;

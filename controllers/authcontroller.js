@@ -1,4 +1,18 @@
 const db = require('../config/db');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { getJwtSecret } = require('../middleware/auth');
+
+const createToken = (user) => jwt.sign(
+    { id_user: user.id_user, email: user.email },
+    getJwtSecret(),
+    { expiresIn: '7d' }
+);
+
+const publicUser = (user) => {
+    const { password: _password, ...safeUser } = user;
+    return safeUser;
+};
 
 const daftar = async (req, res) => {
     const { nama_UMKM, nama_lengkap, username, email, password } = req.body;
@@ -8,13 +22,16 @@ const daftar = async (req, res) => {
     }
 
     try {
+        const hashedPassword = await bcrypt.hash(password, 12);
         const query = `INSERT INTO users (nama_UMKM, nama_lengkap, username, email, password)
             VALUES ($1, $2, $3, $4, $5) RETURNING *`;
-        const result = await db.query(query, [nama_UMKM, nama_lengkap || null, username || null, email, password]);
+        const result = await db.query(query, [nama_UMKM, nama_lengkap || null, username || null, email.trim().toLowerCase(), hashedPassword]);
+        const user = result.rows[0];
         
         return res.status(201).json({
-        pesan: "Reistrasi akun UMKM berhasil disimpan ke database!",
-        data: result.rows[0]
+        pesan: "Registrasi akun UMKM berhasil disimpan ke database!",
+        token: createToken(user),
+        user: publicUser(user)
     });
     } catch (error) {
         console.error("Error Registrasi:", error.message);
@@ -34,18 +51,19 @@ const masuk = async (req, res) => {
     }
 
     try {
-        const query = 'SELECT * FROM users WHERE email = $1 AND password = $2';
-        const result = await db.query(query, [email, password]);
+        const query = 'SELECT * FROM users WHERE email = $1';
+        const result = await db.query(query, [email.trim().toLowerCase()]);
         const rows = result.rows;
 
-        if (rows.length === 0) {
+        if (rows.length === 0 || !(await bcrypt.compare(password, rows[0].password))) {
             return res.status(401).json({ error: "Email atau password salah!"});
         }
 
+        const user = rows[0];
         return res.json({
         pesan: "Login berhasil terverifikasi database!",
-        token: "ini_token_rahasia",
-        user: rows[0]
+        token: createToken(user),
+        user: publicUser(user)
     });
     } catch (error) {
         console.error("Error Login:", error.message);
@@ -61,9 +79,10 @@ const lupaPassword = async (req, res) => {
     }
 
     try {
+        const hashedPassword = await bcrypt.hash(password, 12);
         const result = await db.query(
             "UPDATE users SET password = $1 WHERE email = $2 RETURNING id_user, email",
-            [password, email]
+            [hashedPassword, email.trim().toLowerCase()]
         );
         if (!result.rowCount) return res.status(404).json({ error: "Email tidak ditemukan" });
         return res.json({ pesan: "Password berhasil diubah" });
