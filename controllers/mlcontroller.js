@@ -1,5 +1,5 @@
 const axios = require('axios');
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:8001';
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'https://cuanku-ml-service.vercel.app';
 
 const getPredictionTrend = async (req, res) => {
     const { n_hari } = req.body;
