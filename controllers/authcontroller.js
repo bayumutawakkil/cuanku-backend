@@ -18,6 +18,9 @@ const daftar = async (req, res) => {
     });
     } catch (error) {
         console.error("Error Registrasi:", error.message);
+        if (error.code === '23505') {
+            return res.status(409).json({ error: "Email sudah terdaftar" });
+        }
         return res.status(500).json({ error: "Gagal menyimpan akun ke database" });
     }
 };
@@ -50,8 +53,28 @@ const masuk = async (req, res) => {
     }
 };
 
+const lupaPassword = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password || password.length < 6) {
+        return res.status(400).json({ error: "Email dan password baru minimal 6 karakter wajib diisi" });
+    }
+
+    try {
+        const result = await db.query(
+            "UPDATE users SET password = $1 WHERE email = $2 RETURNING id_user, email",
+            [password, email]
+        );
+        if (!result.rowCount) return res.status(404).json({ error: "Email tidak ditemukan" });
+        return res.json({ pesan: "Password berhasil diubah" });
+    } catch (error) {
+        console.error("Error reset password:", error.message);
+        return res.status(500).json({ error: "Gagal mengubah password" });
+    }
+};
 
 module.exports = {
-    daftar, 
-    masuk
+    daftar,
+    masuk,
+    lupaPassword
 };
