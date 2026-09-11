@@ -1,4 +1,5 @@
 const axios = require('axios');
+const db = require('../config/db');
 const ML_SERVICE_URL = (process.env.ML_SERVICE_URL || 'https://cuanku-ml1.vercel.app').replace(/\/$/, '');
 
 const getPredictionTrend = async (req, res) => {
@@ -12,11 +13,41 @@ const getPredictionTrend = async (req, res) => {
         });
     }
 
-
     try {
+        const userId = req.user.id_user;
+        
+        // Ambil riwayat pendapatan per hari
+        const query = `
+            SELECT tanggal as ds, SUM(jumlah) as y
+            FROM transaksi
+            WHERE user_id = $1 AND jenis_transaksi = 'Pemasukan'
+            GROUP BY tanggal
+            ORDER BY tanggal ASC
+        `;
+        const { rows } = await db.query(query, [userId]);
+
+        // Jika data kurang dari 3 hari, berikan fallback
+        if (rows.length < 3) {
+            return res.status(200).json({
+                status: 'success',
+                source: 'backend_fallback',
+                message: 'Data transaksi tidak cukup untuk melakukan prediksi. Minimal butuh 3 hari data pemasukan.',
+                result: { data: [] }
+            });
+        }
+
+        // Format tanggal (karena node-postgres mengembalikan Date object)
+        const history = rows.map(r => {
+            const dateStr = r.ds instanceof Date ? r.ds.toISOString().split('T')[0] : r.ds;
+            return {
+                ds: dateStr,
+                y: Number(r.y)
+            };
+        });
+
         const response = await axios.post(
             `${ML_SERVICE_URL}/api/ml/predict-trend`,
-            { n_hari: days },
+            { n_hari: days, history },
             { timeout: 15000 }
         );
 
@@ -40,6 +71,7 @@ const getPredictionTrend = async (req, res) => {
                 message: error.response.data?.detail || error.response.data?.message || `ML Service mengembalikan HTTP ${error.response.status}.`
             });
         }
+        console.error('Error on ML prediction:', error.message);
         return res.status(500).json({ status: 'error', message: 'Terjadi kesalahan pada server.'});
     }    
 };
