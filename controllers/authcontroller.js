@@ -94,8 +94,47 @@ const lupaPassword = async (req, res) => {
     }
 };
 
+const getProfile = async (req, res) => {
+    try {
+        const result = await db.query(
+            'SELECT id_user, nama_UMKM, nama_lengkap, username, email, nomor_telepon, kategori_usaha, alamat FROM users WHERE id_user = $1',
+            [req.user.id_user]
+        );
+        if (!result.rowCount) return res.status(404).json({ error: 'Profil tidak ditemukan' });
+        return res.json({ data: result.rows[0] });
+    } catch (error) {
+        console.error('Error mengambil profil:', error.message);
+        return res.status(500).json({ error: 'Gagal mengambil profil' });
+    }
+};
+
+const updateProfile = async (req, res) => {
+    const { nama_UMKM, nama_lengkap, username, email, nomor_telepon, kategori_usaha, alamat } = req.body;
+    if (!nama_UMKM || !email) return res.status(400).json({ error: 'Nama usaha dan email wajib diisi' });
+
+    try {
+        const result = await db.query(
+            `UPDATE users
+             SET nama_UMKM = $1, nama_lengkap = $2, username = $3, email = $4,
+                 nomor_telepon = $5, kategori_usaha = $6, alamat = $7
+             WHERE id_user = $8
+             RETURNING id_user, nama_UMKM, nama_lengkap, username, email, nomor_telepon, kategori_usaha, alamat`,
+            [nama_UMKM.trim(), nama_lengkap?.trim() || null, username?.trim() || null, email.trim().toLowerCase(),
+                nomor_telepon?.trim() || null, kategori_usaha?.trim() || null, alamat?.trim() || null, req.user.id_user]
+        );
+        if (!result.rowCount) return res.status(404).json({ error: 'Profil tidak ditemukan' });
+        return res.json({ pesan: 'Profil berhasil diperbarui', data: result.rows[0] });
+    } catch (error) {
+        console.error('Error memperbarui profil:', error.message);
+        if (error.code === '23505') return res.status(409).json({ error: 'Email atau username sudah digunakan' });
+        return res.status(500).json({ error: 'Gagal memperbarui profil' });
+    }
+};
+
 module.exports = {
     daftar,
     masuk,
-    lupaPassword
+    lupaPassword,
+    getProfile,
+    updateProfile
 };
